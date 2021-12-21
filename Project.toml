@@ -11,6 +11,7 @@ JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
 PDDL = "2c8894f9-daa1-498a-9e3a-26edd9623db8"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SymbolicPlanners = "b6fe5377-9711-4fad-95b0-be4eed71ecbb"
+mutex = "9009efcf-560c-4ab5-8c68-7e0004936d72"
 
 [compat]
 julia = "1"
