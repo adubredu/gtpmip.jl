@@ -9,7 +9,7 @@ using mutex
 include("graph/graph.jl")
 include("solvers/optiplan.jl")
 
-export encode
+export optiplan_solve 
 
 
 end
