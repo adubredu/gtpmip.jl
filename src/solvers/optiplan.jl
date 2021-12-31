@@ -107,24 +107,26 @@ function optiplan_solve(domain_name, problem_name; max_levels=10)
     for i in notinits
         @constraint(model, xs[t][i, ad] == 0)
         @constraint(model, xs[t][i, mn] == 0) 
-        @constraint(model, xs[t][i, pa] == 0)  
+        @constraint(model, xs[t][i, pa] == 0) 
+        @constraint(model, xs[t][i, dl] == 0) 
+        @constraint(model, xs[t][i, pd] == 0)
     end
 
     #Eq. 4
     goals, _ = get_fluent_terminal_indices(graph, max_nf; loc=:goal)
-    [@constraint(model, xs[T][i, ad] + xs[T][i, mn] + xs[T][i, pa] <= 1) for i in goals]
+    [@constraint(model, xs[T][i, ad] + xs[T][i, mn] + xs[T][i, pa] >= 1) for i in goals]
 
-    println("\nAll actions: ",all_actions)
+    # println("\nAll actions: ",all_actions)
     for t=1:T-1
-        println("\n\nLevel ",t)
+        # println("\n\nLevel ",t)
         # println("\nAll actions: ",all_actions)  
         for f = 1:length(graph.props[t])
             fluent = graph.props[t][f]
-            println("\nFluent: ",fluent)
+            # println("\nFluent: ",fluent)
             
             # Eq. 5
             act_inds = get_action_indices(graph, fluent, t, :add, :pre, all_actions)
-            println("Eq. 5 indices: ",act_inds)
+            # println("Eq. 5 indices: ",act_inds)
             # println("Eq.5 actions: ",[all_actions[i] for i in act_inds])
             if !isempty(act_inds)
                 @constraint(model, sum([y[i, t] for i in act_inds]) >= xs[t+1][f, ad] )
@@ -137,7 +139,7 @@ function optiplan_solve(domain_name, problem_name; max_levels=10)
             
             #Eq. 7
             act_inds = get_action_indices(graph, fluent, t, :del, :pre, all_actions)
-            println("Eq. 7 indices: ",act_inds)
+            # println("Eq. 7 indices: ",act_inds)
             # println("Eq.7 actions: ",[all_actions[i] for i in act_inds])
             if !isempty(act_inds)
                 @constraint(model, sum([y[i, t] for i in act_inds]) >= xs[t+1][f, dl] )
@@ -150,7 +152,7 @@ function optiplan_solve(domain_name, problem_name; max_levels=10)
 
             #Eq. 9
             act_inds = get_action_indices(graph, fluent, t, :pre, :del, all_actions)
-            println("Eq. 9 indices: ",act_inds)
+            # println("Eq. 9 indices: ",act_inds)
             # println("Eq.9 actions: ",[all_actions[i] for i in act_inds])
             if !isempty(act_inds)
                 @constraint(model, sum([y[i, t] for i in act_inds]) >= xs[t+1][f, pa] )
@@ -164,7 +166,7 @@ function optiplan_solve(domain_name, problem_name; max_levels=10)
             #Eq. 11
             act_inds = get_action_indices(graph, fluent, t, :pred, :anddel, all_actions)
 
-            println("Eq. 11 indices: ",act_inds)
+            # println("Eq. 11 indices: ",act_inds)
             # println("Eq.11 actions: ",[all_actions[i] for i in act_inds])
             if !isempty(act_inds)
                 @constraint(model, sum([y[i, t] for i in act_inds]) == xs[t+1][f, pd] ) 
@@ -184,6 +186,12 @@ function optiplan_solve(domain_name, problem_name; max_levels=10)
         end 
         num_actions = length([act for act in graph.acts[t] if act.name != :NoOp])
         @constraint(model, sum(y[1:num_actions, t ]) == 1) 
+
+        na = length([act for act in graph.acts[t] if act.name != :NoOp])
+        println(na)
+        for i=na+1:max_na 
+            @constraint(model, y[i,t] == 0)
+        end
     end 
     @objective(model, Min, sum(y))
     optimize!(model)
@@ -196,7 +204,7 @@ function optiplan_solve(domain_name, problem_name; max_levels=10)
     #     @show value.(x)
     # end
     # render_action(sol, graph, all_actions)
-    graph
+    # graph
 end
 
 function render_action(y, graph, all_actions)
