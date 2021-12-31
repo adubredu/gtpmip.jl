@@ -154,17 +154,14 @@ function gpip_solve(domain_name, problem_name; max_levels=10)
             fnext = get_fluent_index(fluent, t, graph) 
             if !isnothing(fnext) && !isempty(act_inds)
                 @constraint(model, x[fnext, t+1] <= sum([y[a, t] for a in act_inds])) 
-            end  
-
-            # act_pairs = get_mutex_actions(fluent, t, graph)
-            # [@constraint(model, y[a[1], t] + y[a[2], t] <= 1) for a in act_pairs]
+            end   
         end 
         # na = length([act for act in graph.acts[t] if act.name != :NoOp])
         na = length(graph.acts[t])
         @constraint(model, y[na+1:max_na, t] .== 0) 
     end
 
-    for t = 1:T-1 #xt, yt, bk: xt+1
+    for t = 1:T-1  
         for f=1:length(graph.props[t])
             fluent = graph.props[t][f]
             act_pairs = get_mutex_actions(fluent, t, graph)
@@ -173,7 +170,7 @@ function gpip_solve(domain_name, problem_name; max_levels=10)
     end  
 
     @objective(model, Min, sum(y))
-    optimize!(model)
+    @time optimize!(model)
     sol = value.(y)
     render_action(sol, graph)
     # graph
