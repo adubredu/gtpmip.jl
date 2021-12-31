@@ -2,4 +2,4 @@
    (:domain blocksworld)
    (:objects a b)
    (:init (on a b)  (clear a) (arm-empty))
-   (:goal (and (on b a))))
+   (:goal (and (holding b))))
