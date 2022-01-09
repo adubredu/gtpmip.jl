@@ -84,11 +84,15 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
             end
         end
     end
-
-
-    @objective(model, Min, sum([norm(xᵣ[:,t]-xᵣ[:,t+1]) for t=1:T-2]))
+    
+    # @objective(model, Min, sum([norm(xᵣ[:,t]-xᵣ[:,t+1]) for t=1:T-2]))
+    t=@variable(model)
+    @constraint(model, [t; sum([xᵣ[:,t]-xᵣ[:,t+1] for t=1:T-2])] in SecondOrderCone())
+    @objective(model, Min, t)
     @time optimize!(model)
-    sol = value.(y)
+    # sol = value.(xᵣ)
+    value.(xₒ)
+    # model
 end
 
 
@@ -148,9 +152,11 @@ function get_actions_precondition_sat(fluent, level, graph)
             push!(act_inds, i)
         end
         if typeof(fluent) == Region 
-            if act.continuous_prec[1].name == fluent.name
-                if intersects(act.continuous_prec[1], fluent)
-                    push!(act_inds, i)
+            if !isempty(act.continuous_prec)
+                if act.continuous_prec[1].name == fluent.name
+                    if intersects(act.continuous_prec[1], fluent)
+                        push!(act_inds, i)
+                    end
                 end
             end
         end

@@ -4,6 +4,7 @@ using PDDL
 using JuMP 
 using Gurobi
 using SymbolicPlanners
+using LinearAlgebra
 # using mutex
 using HybridFunnelGraphs
 
