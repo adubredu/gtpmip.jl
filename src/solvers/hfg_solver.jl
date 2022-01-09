@@ -70,8 +70,21 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
     end
 
     #continuous constraints 
-    #
-    #
+    for t=1:T-1
+        fluents = get_fluents(graph, t)
+        nd = length(graph.props[t][:discrete])
+        for f = nd+1:length(fluents)
+            fluent = fluents[f]
+            if fluent.name == :robot
+                @constraint(model, p[f, t] => {fluent.r[1].þ ≤xᵣ[1, t]≤ fluent.r[2].þ})
+                @constraint(model, p[f, t] => {fluent.r[3].þ ≤xᵣ[2, t]≤ fluent.r[4].þ})
+            elseif fluent.name == :b1
+                @constraint(model, p[f, t] => {fluent.r[1].þ ≤xₒ[1, t]≤ fluent.r[2].þ})
+                @constraint(model, p[f, t] => {fluent.r[3].þ ≤xₒ[2, t]≤ fluent.r[4].þ})
+            end
+        end
+    end
+
 
     @objective(model, Min, sum([norm(xᵣ[:,t]-xᵣ[:,t+1]) for t=1:T-2]))
     @time optimize!(model)
@@ -127,14 +140,55 @@ end
 
 #gets discrete actions as well as funnels too
 function get_actions_precondition_sat(fluent, level, graph)
+    actions = graph.acts[level]
+    act_inds = []
+    for i=1:length(actions)
+        act = graph.acts[level][i]
+        if fluent in act.pos_prec 
+            push!(act_inds, i)
+        end
+        if typeof(fluent) == Region 
+            if act.continuous_prec[1].name == fluent.name
+                if intersects(act.continuous_prec[1], fluent)
+                    push!(act_inds, i)
+                end
+            end
+        end
+    end
+    return act_inds
 end
 
 
 #gets discrete actions as well as funnels too 
 function get_actions_effect_sat(fluent, level, graph)
+    actions = graph.acts[level]
+    act_inds = []
+    for i=1:length(actions)
+        act = graph.acts[level][i]
+        if fluent in act.pos_eff 
+            push!(act_inds, i)
+        end
+        if typeof(fluent) == Region 
+            for er in act.end_region
+                if er.name == fluent.name 
+                    if intersects(er, fluent)
+                        push!(act_inds, i)
+                        break 
+                    end
+                end
+            end
+        end
+    end
+    return act_inds
 end
 
 
 function get_mutex_actions(fluent, level, graph)
+    pref = get_actions_precondition_sat(fluent, level, graph)
+    preneff = union(pref, get_actions_effect_sat(fluent, level, graph))
+    act_mutexes = []
+    [push!(act_mutexes, [i,j]) for i in pref for j in preneff if i!=j && !([j,i] in act_mutexes)]
+
+    return act_mutexes
 end
 
