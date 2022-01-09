@@ -34,10 +34,48 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
     @constraint(model, xₒ[2, T] == 20.5)
 
     #constraints
+    #precondition constraint
+    for t=1:T-1
+        fluents = get_fluents(graph, t)
+        for f=1:length(fluents)
+            fluent = fluents[f]
+            act_inds = get_actions_precondition_sat(fluent, t, graph)
+            [@constraint(model, a[i,t] ≤ p[f,t]) for i in act_inds]
+        end
+    end
 
-    return model
+    #effect constraint 
+    for t=1:T-1
+        fluents = get_fluents(graph, t+1)
+        for f=1:length(fluents)
+            fluent = fluents[f]
+            act_inds = get_actions_effect_sat(fluent, t, graph)
+            fnext = get_fluent_index(fluent, t, graph)
+            if !isnothing(fnext) && !isempty(act_inds)
+                @constraint(model, p[fnext, t+1] ≤ sum([a[i,t] for i in act_inds]))
+            end
+        end
+        na = length(graph.acts[t])
+        @constraint(model, a[na+1:max_na, t] .== 0)
+    end
 
+    #mutex constraint 
+    for t=1:T-1
+        fluents = get_fluents(graph, t)
+        for f=1:length(fluents)
+            fluent = fluents[f]
+            act_pairs = get_mutex_actions(fluent, t, graph)
+            [@constraint(model, a[i[1], t] + a[i[2], t] ≤ 1) for i in act_pairs]
+        end
+    end
 
+    #continuous constraints 
+    #
+    #
+
+    @objective(model, Min, sum([norm(xᵣ[:,t]-xᵣ[:,t+1]) for t=1:T-2]))
+    @time optimize!(model)
+    sol = value.(y)
 end
 
 
@@ -68,3 +106,35 @@ function get_fluent_terminal_indices(graph; loc=:init)
     end 
     return indices   
 end
+
+
+function get_fluents(graph, level)
+    fluents=[graph.props[level][:discrete]...,graph.props[level][:continuous]...]
+    return fluents
+end
+
+
+function get_fluent_index(fluent, t, graph)
+    fluents = get_fluents(graph, t)
+    for i=1:length(fluents)
+        if fluents[i] == fluent 
+            return i 
+        end
+    end
+    return nothing 
+end
+
+
+#gets discrete actions as well as funnels too
+function get_actions_precondition_sat(fluent, level, graph)
+end
+
+
+#gets discrete actions as well as funnels too 
+function get_actions_effect_sat(fluent, level, graph)
+end
+
+
+function get_mutex_actions(fluent, level, graph)
+end
+
