@@ -98,14 +98,17 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
         end
     end
     
-    # @objective(model, Min, sum([norm(xᵣ[:,t]-xᵣ[:,t+1]) for t=1:T-2]))
+    
+    #
     t=@variable(model)
     @constraint(model, [t; sum([xᵣ[:,t]-xᵣ[:,t+1] for t=1:T-2])] in SecondOrderCone())
     @objective(model, Min, t)
     @time optimize!(model)
-    sol = value.(xᵣ)
-    # value.(xₒ)
-    # model
+    sol = value.(a)
+    # sol = value.(xᵣ)
+    # render_action(sol, graph)
+    graph
+    # value.(xₒ) 
 end
 
 
@@ -220,4 +223,21 @@ function get_pick_place_inds(graph, level)
         end
     end
     return act_inds
+end
+
+function render_action(y, graph)
+    T = graph.num_levels-2
+    actions = []
+    for t=1:T 
+        # try
+        ind = findall(x->x == 1.0, y[1:end,t])[1]
+        act  = graph.acts[t][ind-1] 
+        # act = all_actions[ind]
+        push!(actions, (act.name, act.params))
+        # catch 
+        # end
+    end
+    # println(actions)
+    return actions
+
 end
