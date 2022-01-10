@@ -83,6 +83,19 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
                 @constraint(model, p[f, t] => {fluent.r[3].þ ≤xₒ[2, t]≤ fluent.r[4].þ})
             end
         end
+        act_inds = get_pick_place_inds(graph, t)
+        for i in act_inds
+            act = graph.acts[t][i]
+            for reg in act.continuous_prec
+                if reg.name == :robot
+                    @constraint(model, a[i, t] => {reg.r[1].þ ≤xᵣ[1, t]≤ reg.r[2].þ})
+                    @constraint(model, a[i, t] => {reg.r[3].þ ≤xᵣ[2, t]≤ reg.r[4].þ})
+                elseif reg.name == :b1
+                    @constraint(model, a[i, t] => {reg.r[1].þ ≤xₒ[1, t]≤ reg.r[2].þ})
+                    @constraint(model, a[i, t] => {reg.r[3].þ ≤xₒ[2, t]≤ reg.r[4].þ})
+                end
+            end
+        end
     end
     
     # @objective(model, Min, sum([norm(xᵣ[:,t]-xᵣ[:,t+1]) for t=1:T-2]))
@@ -90,8 +103,8 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
     @constraint(model, [t; sum([xᵣ[:,t]-xᵣ[:,t+1] for t=1:T-2])] in SecondOrderCone())
     @objective(model, Min, t)
     @time optimize!(model)
-    # sol = value.(xᵣ)
-    value.(xₒ)
+    sol = value.(xᵣ)
+    # value.(xₒ)
     # model
 end
 
@@ -198,3 +211,13 @@ function get_mutex_actions(fluent, level, graph)
     return act_mutexes
 end
 
+
+function get_pick_place_inds(graph, level)
+    act_inds = []
+    for i=1:length(graph.acts[level])
+        if graph.acts[level][i].name == :pick || graph.acts[level][i].name == :place 
+            push!(act_inds, i)
+        end
+    end
+    return act_inds
+end

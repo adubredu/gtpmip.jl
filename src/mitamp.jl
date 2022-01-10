@@ -10,7 +10,7 @@ using HybridFunnelGraphs
 
 include("graph/graph.jl")
 # include("solvers/optiplan.jl")
-include("solvers/gp_ip.jl")
+# include("solvers/gp_ip.jl")
 include("solvers/hfg_solver.jl")
 
 export optiplan_solve,
