@@ -26,7 +26,8 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
     @constraint(model, xₒ[2, 1] == 10.5)
 
     #goals 
-    goalinds = get_fluent_terminal_indices(graph; loc=:goals) 
+    goalinds = get_fluent_terminal_indices(graph; loc=:goals)
+    println("GOAL: ",goalinds) 
     [@constraint(model, p[f, T] == 1) for f in goalinds]
     [@constraint(model, p[f, T] == 0) for f=1:max_nf if !(f in goalinds)]
     @constraint(model, xᵣ[1, T] == 40.5)
@@ -76,8 +77,8 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
     
 
     #continuous constraints 
-    #=
-    for t=1:T-1
+    
+    for t=1:T
         fluents = get_fluents(graph, t)
         nd = length(graph.props[t][:discrete])
         for f = nd+1:length(fluents)
@@ -90,6 +91,8 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
                 @constraint(model, p[f, t] => {fluent.r[3].þ ≤xₒ[2, t]≤ fluent.r[4].þ})
             end
         end
+    end
+    for t=1:T-1
         act_inds = get_pick_place_inds(graph, t)
         for i in act_inds
             act = graph.acts[t][i]
@@ -110,7 +113,7 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
 
         
     end
-    =#
+    
     
     #
     t=@variable(model)
@@ -118,9 +121,9 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
     @objective(model, Min, t)
     @time optimize!(model)
     sol = value.(a)
-    # sol = value.(p)
+    sol = value.(p)
     # sol = value.(xᵣ)
-    render_action(sol, graph)
+    # render_action(sol, graph)
     # graph
     # value.(xₒ) 
 end
@@ -132,9 +135,8 @@ reg1.r[3].ϕ₁ == reg2.r[3].ϕ₁ && reg1.r[3].ϕ₂ == reg2.r[3].ϕ₂ && reg1
 reg1.r[4].ϕ₁ == reg2.r[4].ϕ₁ && reg1.r[4].ϕ₂ == reg2.r[4].ϕ₂ && reg1.r[4].ϕ₃ == reg2.r[4].ϕ₃ && reg1.r[4].þ == reg2.r[4].þ
 
 function get_fluent_terminal_indices(graph; loc=:init) 
-    indices = []
-    not_ind = [] 
-    T = graph.num_levels - 1 
+    indices = Set()  
+    T = graph.num_levels 
     if loc == :init
         for i=1:length(graph.initprops[:discrete]) 
             ind = findall(x->x == graph.initprops[:discrete], graph.props[0][:discrete])[1]
@@ -145,13 +147,15 @@ function get_fluent_terminal_indices(graph; loc=:init)
             ind = findall(x->x == graph.goalprops[:discrete][i], graph.props[T][:discrete])[1] 
             push!(indices, ind)
         end 
-        nf = length(graph.goalprops[:discrete])
-        for i=nf+1:nf+length(graph.goalprops[:continuous])
-            ind = findall(x-> intersects(x, graph.goalprops[:continuous][i-nf]), graph.props[T][:continuous])[1]
+        nf = length(graph.props[T][:discrete])
+        # println("discrete goals ",indices,nf)
+        
+        for i=1:length(graph.goalprops[:continuous])
+            ind = findall(x-> intersects(x, graph.goalprops[:continuous][i]), graph.props[T][:continuous])[1] 
             push!(indices, ind+nf)
         end
     end 
-    return indices   
+    return collect(indices)  
 end
 
 
@@ -212,6 +216,7 @@ function get_actions_effect_sat(fluent, level, graph)
                 if er.name == fluent.name 
                     if intersects(er, fluent)
                         push!(act_inds, i)
+                        if level == 9 println(act.name," intersects") end
                         break 
                     end
                 end
