@@ -5,9 +5,10 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
     model = Model(Gurobi.Optimizer)
     set_silent(model)
 
-    T = graph.num_levels-1
+    T = graph.num_levels
     max_nf = max([length(graph.props[i][:discrete])+length(graph.props[i][:continuous]) for i=1:T]...) 
-    max_na = max([length(graph.acts[i]) for i=1:T-1]...)
+    # max_na = max([length(graph.acts[i]) for i=1:T-1]...)
+    max_na = max([length([act for act in graph.acts[i] if act.name != :noop && act.name != :maintain]) for i=1:T-1]...) 
 
     @variable(model, p[i=1:max_nf, j=1:T], Bin)
     @variable(model, a[i=1:max_na, j=1:T-1], Bin)
@@ -16,7 +17,7 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
     @variable(model, xₒ[i=1:2, j=1:T])
 
     #inits 
-    num_init_props = length(graph.initprops)
+    num_init_props = length(get_fluents(graph, 1))
     [@constraint(model, p[i, 1] == 1) for i = 1 : num_init_props]
     [@constraint(model, p[i, 1] == 0) for i = num_init_props+1 : max_nf]
     @constraint(model, xᵣ[1, 1] == 0.25)
@@ -40,8 +41,10 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
         for f=1:length(fluents)
             fluent = fluents[f]
             act_inds = get_actions_precondition_sat(fluent, t, graph)
+            # println( " act_inds: ",act_inds)
             [@constraint(model, a[i,t] ≤ p[f,t]) for i in act_inds]
         end
+        # println("**")
     end
 
     #effect constraint 
@@ -50,7 +53,8 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
         for f=1:length(fluents)
             fluent = fluents[f]
             act_inds = get_actions_effect_sat(fluent, t, graph)
-            fnext = get_fluent_index(fluent, t, graph)
+            fnext = get_fluent_index(fluent, t+1, graph)
+            # println(fluent, " act_inds: ",act_inds)
             if !isnothing(fnext) && !isempty(act_inds)
                 @constraint(model, p[fnext, t+1] ≤ sum([a[i,t] for i in act_inds]))
             end
@@ -60,6 +64,7 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
     end
 
     #mutex constraint 
+    
     for t=1:T-1
         fluents = get_fluents(graph, t)
         for f=1:length(fluents)
@@ -68,8 +73,10 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
             [@constraint(model, a[i[1], t] + a[i[2], t] ≤ 1) for i in act_pairs]
         end
     end
+    
 
     #continuous constraints 
+    #=
     for t=1:T-1
         fluents = get_fluents(graph, t)
         nd = length(graph.props[t][:discrete])
@@ -96,8 +103,14 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
                 end
             end
         end
+        # nempty = length([act for act in graph.acts[t] if act.name != :noop && act.name != :maintain])
+        # println("level ",t," num acts ",nempty)
+        # [@constraint(model, a[i,t] == 0) for i = nempty+1:max_na] 
+        # @constraint(model, sum([a[i, t] for i=1:max_na])==1 )
+
+        
     end
-    
+    =#
     
     #
     t=@variable(model)
@@ -105,9 +118,10 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
     @objective(model, Min, t)
     @time optimize!(model)
     sol = value.(a)
+    # sol = value.(p)
     # sol = value.(xᵣ)
-    # render_action(sol, graph)
-    graph
+    render_action(sol, graph)
+    # graph
     # value.(xₒ) 
 end
 
@@ -160,7 +174,8 @@ end
 
 #gets discrete actions as well as funnels too
 function get_actions_precondition_sat(fluent, level, graph)
-    actions = graph.acts[level]
+    # actions = graph.acts[level]
+    actions = [act for act in graph.acts[level] if act.name != :noop && act.name != :maintain]
     act_inds = []
     for i=1:length(actions)
         act = graph.acts[level][i]
@@ -183,7 +198,9 @@ end
 
 #gets discrete actions as well as funnels too 
 function get_actions_effect_sat(fluent, level, graph)
-    actions = graph.acts[level]
+    # actions = graph.acts[level]
+    actions = [act for act in graph.acts[level] if act.name != :noop && act.name != :maintain]
+
     act_inds = []
     for i=1:length(actions)
         act = graph.acts[level][i]
@@ -225,13 +242,25 @@ function get_pick_place_inds(graph, level)
     return act_inds
 end
 
+
+function get_nonactinds(graph, level)
+    nonactinds = []
+    for i=1:length(graph.acts[level])
+        if graph.acts[level][i].name == :noop || graph.acts[level][i].name == :maintain
+            push!(nonactinds, i)
+        end
+    end
+    return nonactinds
+end
+
+
 function render_action(y, graph)
-    T = graph.num_levels-2
+    T = graph.num_levels-1
     actions = []
     for t=1:T 
         # try
         ind = findall(x->x == 1.0, y[1:end,t])[1]
-        act  = graph.acts[t][ind-1] 
+        act  = graph.acts[t][ind] 
         # act = all_actions[ind]
         push!(actions, (act.name, act.params))
         # catch 
