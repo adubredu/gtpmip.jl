@@ -29,7 +29,7 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
     goalinds = get_fluent_terminal_indices(graph; loc=:goals)
     println("GOAL: ",goalinds) 
     [@constraint(model, p[f, T] == 1) for f in goalinds]
-    [@constraint(model, p[f, T] == 0) for f=1:max_nf if !(f in goalinds)]
+    # [@constraint(model, p[f, T] == 0) for f=1:max_nf if !(f in goalinds)]
     @constraint(model, xᵣ[1, T] == 40.5)
     @constraint(model, xᵣ[2, T] == 40.5)
     @constraint(model, xₒ[1, T] == 20.5)
@@ -42,7 +42,7 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
         for f=1:length(fluents)
             fluent = fluents[f]
             act_inds = get_actions_precondition_sat(fluent, t, graph)
-            # println( " act_inds: ",act_inds)
+            # if t==9 println(fluent, " act_inds: ",act_inds) end
             [@constraint(model, a[i,t] ≤ p[f,t]) for i in act_inds]
         end
         # println("**")
@@ -55,7 +55,7 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
             fluent = fluents[f]
             act_inds = get_actions_effect_sat(fluent, t, graph)
             fnext = get_fluent_index(fluent, t+1, graph)
-            # println(fluent, " act_inds: ",act_inds)
+            
             if !isnothing(fnext) && !isempty(act_inds)
                 @constraint(model, p[fnext, t+1] ≤ sum([a[i,t] for i in act_inds]))
             end
@@ -74,6 +74,11 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
             [@constraint(model, a[i[1], t] + a[i[2], t] ≤ 1) for i in act_pairs]
         end
     end
+    # for t=1:T-1 
+    #     prop_pairs = get_mutex_indices(t, graph)
+    #     println("pairs ",prop_pairs)
+    #     [@constraint(model, p[i[1], t] + p[i[2], t] ≤ 1) for i in prop_pairs]
+    # end
     
 
     #continuous constraints 
@@ -121,7 +126,7 @@ function solve_hfg(domain_name, problem_name; max_levels=10)
     @objective(model, Min, t)
     @time optimize!(model)
     sol = value.(a)
-    sol = value.(p)
+    # sol = value.(p)
     # sol = value.(xᵣ)
     # render_action(sol, graph)
     # graph
@@ -148,11 +153,10 @@ function get_fluent_terminal_indices(graph; loc=:init)
             push!(indices, ind)
         end 
         nf = length(graph.props[T][:discrete])
-        # println("discrete goals ",indices,nf)
         
         for i=1:length(graph.goalprops[:continuous])
             ind = findall(x-> intersects(x, graph.goalprops[:continuous][i]), graph.props[T][:continuous])[1] 
-            push!(indices, ind+nf)
+            # push!(indices, ind+nf)
         end
     end 
     return collect(indices)  
@@ -216,7 +220,7 @@ function get_actions_effect_sat(fluent, level, graph)
                 if er.name == fluent.name 
                     if intersects(er, fluent)
                         push!(act_inds, i)
-                        if level == 9 println(act.name," intersects") end
+                        # if level == 9 println(act.name," intersects") end
                         break 
                     end
                 end
@@ -234,6 +238,20 @@ function get_mutex_actions(fluent, level, graph)
     [push!(act_mutexes, [i,j]) for i in pref for j in preneff if i!=j && !([j,i] in act_mutexes)]
 
     return act_mutexes
+end
+
+
+function get_mutex_indices(level, graph)
+    prop_mutexes = []
+    pairs = [pair for pair in graph.μprops[level] if typeof(pair[1])!= Region]
+    props = get_fluents(graph, level)
+    for pair in pairs
+        i = findall(x->x == pair[1], props)[1]
+        j = findall(x->x == pair[2], props)[1]
+         
+        if !([j,i] in prop_mutexes) push!(prop_mutexes, [i,j]) end
+    end
+    return prop_mutexes
 end
 
 
