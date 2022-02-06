@@ -1,4 +1,5 @@
 mutable struct Soln 
-    plan 
-    robot_poses  
+    plan::Vector{Tuple{Symbol,Vector{Any}}} 
+    robot_poses::Vector{Vector{Float64}}  
+    graph::Graph
 end
