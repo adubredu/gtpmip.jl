@@ -101,7 +101,7 @@ function solve_hpd(domain_name, problem_name; max_levels=20)
     optimal_funnel_indices = value.(a) 
     plan = render_action(optimal_funnel_indices, graph)
     X = value.(xᵣ)
-    robot_poses = [X[:,i] for i in 1:size(A,2)]
+    robot_poses = [X[:,i] for i in 1:size(X,2)]
     sol = Soln(plan, robot_poses)
     return sol  
 end
