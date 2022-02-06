@@ -1,4 +1,4 @@
 using Revise
-using mitamp
+using gtpmip
 
 test_mutexes("test/pddl/domain.pddl", "test/pddl/problem.pddl") 

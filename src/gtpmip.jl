@@ -1,4 +1,4 @@
-module mitamp
+module gtpmip
 
 using PDDL
 using JuMP 
