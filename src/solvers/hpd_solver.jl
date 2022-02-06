@@ -10,16 +10,20 @@ function solve_hpd(domain_name, problem_name; max_levels=20)
 
     @variable(model, p[i=1:max_nf, j=1:T], Bin)
     @variable(model, a[i=1:max_na, j=1:T-1], Bin)
-    @variable(model, xᵣ[i=1:2, j=1:T])
+    @variable(model, xᵣ[i=1:2, j=1:T-1])
 
     # init constraints
     num_init_props = length(graph.props[1][:discrete])
     [@constraint(model, p[i, 1] == 1) for i = 1: num_init_props]
     [@constraint(model, p[i, 1] == 0) for i = num_init_props+1 : max_nf]
+    @constraint(model, xᵣ[1, 1] == graph.initprops[:continuous][1][:xr])
+    @constraint(model, xᵣ[2, 1] == graph.initprops[:continuous][1][:yr])
     
     # goal constraints
     goalinds = get_fluent_terminal_indices(graph; loc=:goals)
     [@constraint(model, p[f, T] == 1) for f in goalinds]
+    @constraint(model, xᵣ[1, T-1] == graph.goalprops[:continuous][:xr])
+    @constraint(model, xᵣ[2, T-1] == graph.goalprops[:continuous][:yr])
  
     # precondition constraints
     for t = 1:T-1
@@ -60,12 +64,43 @@ function solve_hpd(domain_name, problem_name; max_levels=20)
             [@constraint(model, a[i[1], t] + a[i[2], t] <= 1) for i in act_pairs]
         end
     end 
-    #mutex constraint 
-    @objective(model, Min, sum(a))
+
+    # continuous constraints
+    # does this for all actions. There might be some contradictions.
+    # I only want to do it for a single action in every level
+    for t = 1:T-1
+        for i=1:length(graph.acts[t]) 
+            if graph.acts[t][i].name != :noop
+                if isa(graph.acts[t][i].end_region[:xr], Float64)
+                    @constraint(model, a[i,t] => {xᵣ[1,t] == graph.acts[t][i].end_region[:xr]})
+                    @constraint(model, a[i,t] => {xᵣ[2,t] == graph.acts[t][i].end_region[:yr]})
+                else
+                    @constraint(model, a[i,t] => {graph.acts[t][i].end_region[:xr][1] ≤ xᵣ[1,t] ≤ graph.acts[t][i].end_region[:xr][2]})
+                    @constraint(model, a[i,t] => {graph.acts[t][i].end_region[:yr][1] ≤ xᵣ[2,t] ≤ graph.acts[t][i].end_region[:yr][2] })
+                end
+            end
+        end
+    end
+
+
+
+    # t=@variable(model)
+    # @constraint(model, [t; sum([xᵣ[:,t]-xᵣ[:,t+1] for t=1:T-2])] in SecondOrderCone())
+    # @objective(model, Min, t)
+    
+    # @NLexpression(model, n, [nm(xᵣ[:,t]-xᵣ[:,t+1]) for t=1:T-1])
+    # @NLobjective(model, Min, sum(n))
+
+    # @objective(model, Min, sum(a))
+
+    nm(xs) = sum([x^2 for x in xs])
+    @objective(model, Min, sum([nm(xᵣ[:,t]-xᵣ[:,t+1]) for t=1:T-2]))
+
     optimize!(model)
-    sol = value.(a)
-    # graph
+    # sol = value.(xᵣ) 
+    sol = value.(a) 
     render_action(sol, graph)
+    # graph
 end
 
 function get_fluent_terminal_indices(graph::Graph; loc=:init)
