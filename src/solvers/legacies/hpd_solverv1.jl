@@ -1,3 +1,4 @@
+# works well. no complaints
 function solve_hpd(domain_name, problem_name; max_levels=20)
     graph = create_funnel_graph(domain_name, problem_name; max_levels=max_levels)
 
@@ -47,7 +48,13 @@ function solve_hpd(domain_name, problem_name; max_levels=20)
             end
         end
         na = length(graph.acts[t])
-        @constraint(model, a[na+1:max_na, t] .== 0) 
+        @constraint(model, a[na+1:max_na, t] .== 0)
+        # for i = 1:na
+        #     if graph.acts[t][i].name == :noop  && i<=max_na 
+        #         @constraint(model, a[i, t] == 0)
+        #     end
+        # end
+        # @constraint(model, sum(a[:, t])==1)
     end
 
     # mutex constraints
@@ -57,7 +64,11 @@ function solve_hpd(domain_name, problem_name; max_levels=20)
             act_pairs = get_mutex_actions(fluent, t, graph)
             [@constraint(model, a[i[1], t] + a[i[2], t] <= 1) for i in act_pairs]
         end
-    end  
+    end 
+
+    # continuous constraints
+    # does this for all actions. There might be some contradictions.
+    # I only want to do it for a single action in every level
     for t = 1:T-1
         for i=1:length(graph.acts[t]) 
             if graph.acts[t][i].name != :noop
@@ -70,10 +81,22 @@ function solve_hpd(domain_name, problem_name; max_levels=20)
                 end
             end
         end
-    end 
+    end
+
+
+
+    # t=@variable(model)
+    # @constraint(model, [t; sum([xᵣ[:,t]-xᵣ[:,t+1] for t=1:T-2])] in SecondOrderCone())
+    # @objective(model, Min, t)
+    
+    # @NLexpression(model, n, [nm(xᵣ[:,t]-xᵣ[:,t+1]) for t=1:T-1])
+    # @NLobjective(model, Min, sum(n))
+
+    # @objective(model, Min, sum(a))
 
     nm(xs) = sum([x^2 for x in xs])
     @objective(model, Min, sum([nm(xᵣ[:,t]-xᵣ[:,t+1]) for t=1:T-2]))
+
     optimize!(model) 
     optimal_funnel_indices = value.(a) 
     plan = render_action(optimal_funnel_indices, graph)
@@ -137,6 +160,7 @@ function get_mutex_actions(fluent, level, graph)
     return act_mutexes
 end
 
+
 function get_mutex_indices(level, graph)
     act_mutexes = []
     for pair in graph.μacts[level]
@@ -153,7 +177,8 @@ function render_action(y, graph::Graph)
     actions = []
     for t=1:T-1  
         ind = findall(x->x == 1.0, y[1:end,t])
-        id = ind[1] 
+        id = ind[1]
+        # for i in ind if graph.acts[t][i].name != :noop id = i; break; end end
         act  = graph.acts[t][id]  
         push!(actions, (act.name, act.params)) 
     end 

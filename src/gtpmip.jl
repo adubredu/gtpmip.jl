@@ -8,10 +8,7 @@ using LinearAlgebra
 # using mutex
 using HybridFunnelGraphs
 
-include("graph/graph.jl")
-# include("solvers/optiplan.jl")
-# include("solvers/gp_ip.jl")
-# include("solvers/hfg_solver.jl")
+include("types.jl")
 include("solvers/hpd_solver.jl")
 
 export solve_hpd
