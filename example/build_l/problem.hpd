@@ -18,10 +18,10 @@
                              (vymin==-1.5) (vymax==1.5)
                              (xbmin==0.0) (xbmax==4.0)
                              (ybmin==0.0) (ybmax==4.0)
-                             (bdelta==0.5)))
+                             (bdelta==1)))
     (:continuous_goals (math (xr==1.0) (yr==6.0)))
-    (:external_constraints (math (0.0<=xg<=0.0&&0.0<=yg<=2.5)
-                                 (0.0<=xg<=2.5&&0.0<=yg<=0.0) )) 
+    (:external_constraints (math (0.0<=xg<=0.0&&0.0<=yg<=5)
+                                 (0.0<=xg<=5&&0.0<=yg<=0.0) )) 
     (:objective_function (math (xr**2+yr**2)))
  
 )
