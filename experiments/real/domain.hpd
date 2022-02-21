@@ -1,0 +1,42 @@
+(define (domain real)
+(:predicates (handempty)
+             (holding ?obj)
+             (stocked ?obj))
+
+(:action pick
+    :parameters (?obj)
+    :precondition (and  (handempty))
+    :continuous_precondition (math (|xr-xo|**2+|yr-yo|**2<=0.25))
+    :dynamics ()
+    :continuous_effect (math (xo==xr) (yo==yr))
+    :effect (and  (holding ?obj) 
+                   (not (handempty)) (not (stocked ?obj))))
+
+(:action place
+    :parameters (?obj)
+    :precondition (and (holding ?obj) (not (stocked ?obj)))
+    :continuous_precondition (math (|xr-xg|**2+|yr-yg|**2<=0.25))
+    :dynamics ()
+    :continuous_effect (math (xo==xg) (yo==yg))
+    :effect (and (handempty) (stocked ?obj)
+                 (not (holding ?obj)))
+)
+
+(:action move
+    :parameters ()
+    :precondition (and (handempty))
+    :continuous_precondition ()
+    :dynamics (math (xr==vx*t) (yr==vy*t))
+    :continuous_effect ()
+    :effect (and (handempty))
+)
+
+(:action move_holding
+    :parameters (?obj)
+    :precondition (and (holding ?obj))
+    :continuous_precondition ()
+    :dynamics (math (xr==vx*t) (yr==vy*t))
+    :continuous_effect (math (x0==xr) (y0==yr))
+    :effect (and (holding ?obj))
+)
+)
