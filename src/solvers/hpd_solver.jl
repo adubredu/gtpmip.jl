@@ -1,6 +1,9 @@
 function solve_hpd(domain_name, problem_name; max_levels=20, has_placement_constraint=true)
+    println("Graph building time:")
+    @time begin
     graph = create_funnel_graph(domain_name, problem_name; max_levels=max_levels, 
                 has_placement_constraint=has_placement_constraint)
+    end
 
     model = Model(Gurobi.Optimizer)
     set_silent(model)
@@ -75,7 +78,8 @@ function solve_hpd(domain_name, problem_name; max_levels=20, has_placement_const
 
     nm(xs) = sum([x^2 for x in xs])
     @objective(model, Min, sum([nm(xᵣ[:,t]-xᵣ[:,t+1]) for t=1:T-2]))
-    optimize!(model) 
+    println("Optimization time: ")
+    @time optimize!(model) 
     optimal_funnel_indices = value.(a) 
     plan = render_action(optimal_funnel_indices, graph)
     X = value.(xᵣ)
