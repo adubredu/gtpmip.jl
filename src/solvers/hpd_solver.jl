@@ -1,5 +1,6 @@
-function solve_hpd(domain_name, problem_name; max_levels=20)
-    graph = create_funnel_graph(domain_name, problem_name; max_levels=max_levels)
+function solve_hpd(domain_name, problem_name; max_levels=20, has_placement_constraint=true)
+    graph = create_funnel_graph(domain_name, problem_name; max_levels=max_levels, 
+                has_placement_constraint=has_placement_constraint)
 
     model = Model(Gurobi.Optimizer)
     set_silent(model)
