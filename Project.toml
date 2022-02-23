@@ -14,6 +14,7 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PDDL = "2c8894f9-daa1-498a-9e3a-26edd9623db8"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SymbolicPlanners = "b6fe5377-9711-4fad-95b0-be4eed71ecbb"
+mutex = "9009efcf-560c-4ab5-8c68-7e0004936d72"
 westbrick = "0e4869b7-c236-41a1-945d-fd0e3bc5ead1"
 
 [compat]
