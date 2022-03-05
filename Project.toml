@@ -17,8 +17,9 @@ SymbolicPlanners = "b6fe5377-9711-4fad-95b0-be4eed71ecbb"
 mutex = "9009efcf-560c-4ab5-8c68-7e0004936d72"
 westbrick = "0e4869b7-c236-41a1-945d-fd0e3bc5ead1"
 
-[compat]
-JuMP = "0.23"
+[compat] 
+Gurobi = "0.11" 
+JuMP = "0.23" 
 julia = "1"
 
 [extras]
