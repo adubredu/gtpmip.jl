@@ -1,0 +1,110 @@
+9×10 Matrix{Float64}:
+ 1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  0.0
+ 1.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  1.0
+ 1.0  0.0  0.0  0.0  1.0  1.0  1.0  1.0  0.0  0.0
+ 1.0  1.0  1.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  1.0  1.0  1.0  1.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  1.0  1.0  1.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+
+Set parameter Username
+Academic license - for non-commercial use only - expires 2022-02-18
+GOAL: Any[2]
+  0.003413 seconds (7.48 k allocations: 657.312 KiB)
+4×9 Matrix{Float64}:
+ 1.0  1.0  1.0  1.0  1.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0
+ 0.0  0.0  0.0  0.0  0.0  1.0  1.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0
+
+Set parameter Username
+Academic license - for non-commercial use only - expires 2022-02-18
+GOAL: Any[2]
+  0.003441 seconds (7.48 k allocations: 657.312 KiB)
+9-element Vector{Any}:
+ (:move, Julog.Const[])
+ (:move, Julog.Const[])
+ (:move, Julog.Const[])
+ (:move, Julog.Const[])
+ (:pick, Julog.Const[b1])
+ (:move_holding, Julog.Const[b1])
+ (:move_holding, Julog.Const[b1])
+ (:move_holding, Julog.Const[b1])
+ (:place, Julog.Const[b1])
+
+ -----------------------------------------------------------------
+ # with HFG no move btn pick and place
+ 17-element Vector{Any}:
+ (:move, Any[])
+ (:move, Any[])
+ (:move, Any[])
+ (:noop, Any[])
+ (:pick, Julog.Const[b1])
+ (:place, Julog.Const[b1])
+ (:pick, Julog.Const[b2])
+ (:place, Julog.Const[b2])
+ (:pick, Julog.Const[b3])
+ (:place, Julog.Const[b3])
+ (:pick, Julog.Const[b4])
+ (:place, Julog.Const[b4])
+ (:pick, Julog.Const[b5])
+ (:place, Julog.Const[b5])
+ (:noop, Any[])
+ (:pick, Julog.Const[b6])
+ (:place, Julog.Const[b6])
+
+ --------------------------------------
+ 
+(:noop, Any[])
+(:noop, Any[])
+(:move, Any[])
+(:move, Any[])
+(:pick, Julog.Const[b1])
+(:move_holding, Julog.Const[b1])
+(:place, Julog.Const[b1])
+(:move, Any[])
+(:noop, Any[])
+(:noop, Any[])
+(:noop, Any[])
+(:noop, Any[])
+(:noop, Any[])
+(:move, Any[])
+(:move, Any[])
+(:pick, Julog.Const[b2])
+(:place, Julog.Const[b2])
+(:move, Any[])
+(:noop, Any[])
+(:move, Any[])
+(:noop, Any[])
+(:move, Any[])
+(:move, Any[])
+(:noop, Any[])
+(:noop, Any[])
+(:move, Any[])
+(:noop, Any[])
+(:move, Any[])
+(:noop, Any[])
+(:pick, Julog.Const[b3])
+(:place, Julog.Const[b3])
+(:noop, Any[])
+(:move, Any[])
+(:pick, Julog.Const[b4])
+(:place, Julog.Const[b4])
+(:noop, Any[])
+(:pick, Julog.Const[b5])
+(:move_holding, Julog.Const[b5])
+(:place, Julog.Const[b5])
+(:move, Any[])
+(:noop, Any[])
+(:move, Any[])
+(:noop, Any[])
+(:pick, Julog.Const[b6])
+(:place, Julog.Const[b6])
+(:pick, Julog.Const[b6])
+(:move_holding, Julog.Const[b6])
+(:noop, Any[])
+(:move_holding, Julog.Const[b6])
+(:noop, Any[])
+(:place, Julog.Const[b6])
