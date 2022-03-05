@@ -1,2 +1,4 @@
 /Manifest.toml
 /src/graph/pddl/fd.py
+/src/solvers/bk*
+/src/solvers/old*
