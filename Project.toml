@@ -1,4 +1,4 @@
-name = "mitamp"
+name = "gtpmip"
 uuid = "981013b0-5675-4c93-8da2-68c1932b11b2"
 authors = ["Alphonsus Adu-Bredu"]
 version = "0.1.0"
@@ -7,13 +7,21 @@ version = "0.1.0"
 Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
 GraphPlot = "a2cc645c-3eea-5389-862e-a155d0052231"
 Gurobi = "2e9cd046-0924-5485-92f1-d5272153d98b"
+HPD = "9e52bb9f-844e-4299-848a-4df0e5a00971"
+HybridFunnelGraphs = "b20249b2-010b-4d3f-9d32-f15d2ff14e30"
 JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PDDL = "2c8894f9-daa1-498a-9e3a-26edd9623db8"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SymbolicPlanners = "b6fe5377-9711-4fad-95b0-be4eed71ecbb"
-
-[compat]
-PDDL = "0.2"
+mutex = "9009efcf-560c-4ab5-8c68-7e0004936d72"
+westbrick = "0e4869b7-c236-41a1-945d-fd0e3bc5ead1"
+ 
+[compat] 
+PDDL = "0.2" 
+SymbolicPlanners = "0.1"  
+Gurobi = "0.11" 
+JuMP = "0.23"   
 julia = "1"
 
 [extras]
