@@ -9,6 +9,8 @@ Julia package for the `GTPMIP` algorithm. Given an optimal constrained task plan
 `Enter` on your keyboard to install this package.
 4. Press the `Backspace` key on your keyboard to return to the REPL
 
+This package uses Gurobi to solve Mixed Integer Programs. As such, a Gurobi license is required to use this package. Instructions on how to acquire a free academic Gurobi license can be found [here](https://www.gurobi.com/academia/academic-program-and-licenses/)
+
 ## Usage
 Example usage scripts can be found in the [experiments](experiments) folder.
 
