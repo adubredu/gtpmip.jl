@@ -1,8 +1,10 @@
 using Revise
 using gtpmip
 using westbrick
-
-grounded_plan = solve_hpd("experiments/sim/task3/domain.hpd", "experiments/sim/task3/problem.hpd"; max_levels=200)
+ 
+grounded_plan = solve_hpd(joinpath(dirname(pathof(gtpmip)), "..", "experiments/sim/task3/domain.hpd"), 
+                        joinpath(dirname(pathof(gtpmip)), "..", "experiments/sim/task3/problem.hpd");
+                         max_levels=1000)
 grounded_plan.plan
 
 num_objects = 9
@@ -30,4 +32,4 @@ for i = 1:grounded_plan.size
 end
 
 println("Execution time:")
-@time visualize_trajectory!(bobby, traj, obj_traj, obs_dict, ax, fig;name="media/build_i.gif")
+@time visualize_trajectory!(bobby, traj, obj_traj, obs_dict, ax, fig;name="build_i.gif")

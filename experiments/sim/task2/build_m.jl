@@ -1,8 +1,10 @@
 using Revise
 using gtpmip
 using westbrick
-
-grounded_plan = solve_hpd("experiments/sim/task2/domain.hpd", "experiments/sim/task2/problem.hpd"; max_levels=1000)
+ 
+grounded_plan = solve_hpd(joinpath(dirname(pathof(gtpmip)), "..", "experiments/sim/task2/domain.hpd"), 
+                        joinpath(dirname(pathof(gtpmip)), "..", "experiments/sim/task2/problem.hpd");
+                         max_levels=1000)
 grounded_plan.plan
 
 num_objects = 30
@@ -22,8 +24,7 @@ for i = 1:grounded_plan.size
     pose = grounded_plan.robot_poses[i]
     action = grounded_plan.plan[i]
     move!(bobby, pose, traj, obj_traj) 
-    if action[1] == :pick 
-        # object_id = parse(Int, string(action[2][1])[end]) 
+    if action[1] == :pick   
         object_id = objname_dict[action[2][1].name]
         pick!(bobby, -π/2., objects[object_id], traj, obj_traj)
     elseif action[1] == :place 
@@ -33,4 +34,4 @@ for i = 1:grounded_plan.size
 end
 
 println("Execution time:")
-@time visualize_trajectory!(bobby, traj, obj_traj, obs_dict, ax, fig;name="media/build_m.gif")
+@time visualize_trajectory!(bobby, traj, obj_traj, obs_dict, ax, fig;name="build_m.gif")
