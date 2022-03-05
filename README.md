@@ -1,6 +1,6 @@
-# gtpmip
-![](media/overview.png)
+# GTPMIP
 ## Grounded Task Planning as Mixed Integer Programming.
+![](media/overview.png)
 Julia package for the `GTPMIP` algorithm. Given an optimal constrained task planning problem specified in an [hpd](https://github.com/adubredu/HPD.jl) file, GTPMIP returns a logically coherent sequence of actions, each with its corresponding optimal continuous parameters.
 
 ## Installation
